@@ -124,7 +124,7 @@ namespace auto_update_console
         private static void CreateBatFile(string fileName)
         {
             string appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".exe";
-            var command = $"taskkill /IM \"{appName}\" /F\r\ndel /F \"auto-update-console.exe\"\r\nren \"{fileName}\" \"auto-update-console.exe\"\r\nauto-update-console.exe";
+            var command = $"taskkill /IM \"{appName}\" /F\r\ndel /F \"auto-update-console.exe\"\r\nren \"{fileName}\" \"auto-update-console.exe\"\r\nauto-update-console.exe\r\ndel /F \"updateApplication.bat\"";
             try
             {
                 if (File.Exists(bat))
