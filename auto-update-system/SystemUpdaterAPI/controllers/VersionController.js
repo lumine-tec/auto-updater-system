@@ -20,9 +20,7 @@ module.exports = (app) => {
             });
 
             ver = json[0];
-
         }
-        
         
         res.send(ver);
     });
