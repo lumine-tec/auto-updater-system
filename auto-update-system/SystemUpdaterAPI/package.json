@@ -1,0 +1,9 @@
+{
+  "name": "system-updater-api",
+  "version": "0.0.0",
+  "description": "SystemUpdaterAPI",
+  "main": "server.js",
+  "author": {
+    "name": ""
+  }
+}
