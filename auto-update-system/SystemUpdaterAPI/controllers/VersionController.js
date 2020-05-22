@@ -1,7 +1,7 @@
 module.exports = (app) => {
 
-    // [GET] => /version/current
-    app.get(`/version/current`, (req, res) => {
+    // [GET] => /version
+    app.get(`/version`, (req, res) => {
         const fs = require("fs");
 
         let ver = null;
