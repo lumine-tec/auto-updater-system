@@ -62,6 +62,9 @@ namespace auto_update_console
 
                     File.WriteAllBytes(AppDomain.CurrentDomain.BaseDirectory + "newVersion.exe", downloadData);
 
+                    info.version = response.Content;
+                    UpdateJSON();
+
                     return AppDomain.CurrentDomain.BaseDirectory + "newVersion.exe";
                 }
 
@@ -69,9 +72,21 @@ namespace auto_update_console
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.Message);
 
                 return "";
+            }
+        }
+
+        private static void UpdateJSON()
+        {
+            try
+            {
+                File.WriteAllText(pathInfo, JsonConvert.SerializeObject(info));
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
             }
         }
 
@@ -97,11 +112,11 @@ namespace auto_update_console
                         ExecuteBat();
                     }
 
-                    Thread.Sleep(minute);
+                    Thread.Sleep(hour);
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
+                    Console.WriteLine(e.Message);
                 }
             }
         }
@@ -121,7 +136,7 @@ namespace auto_update_console
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.Message);
             }
         }
 
@@ -137,7 +152,7 @@ namespace auto_update_console
             }
             catch (Exception e)
             {
-                Console.WriteLine(e);
+                Console.WriteLine(e.Message);
             }
         }
     }
