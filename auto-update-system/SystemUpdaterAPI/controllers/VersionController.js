@@ -21,7 +21,7 @@ module.exports = (app) => {
             ver = packages[0];
         }
         
-        res.json(ver);
+        res.send(ver);
     });
 
     // [GET] => /version/:version
