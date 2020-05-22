@@ -1,8 +1,12 @@
-'use strict';
-var http = require('http');
-var port = process.env.PORT || 1337;
+global.PROD = ((process.env.NODE_ENV || "").toLowerCase() === 'prod') ? true : false;
+global.ROOT = __dirname;
 
-http.createServer(function (req, res) {
-    res.writeHead(200, { 'Content-Type': 'text/plain' });
-    res.end('Hello World\n');
-}).listen(port);
+const app = require("./config/custom-express")();
+
+const port = (PROD) ? 3000 : 3000;
+
+app.listen(port, async () => {
+    console.clear();
+    console.log(`Rodando na porta ${port}`);
+
+});
