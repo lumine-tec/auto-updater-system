@@ -4,25 +4,25 @@ module.exports = (app) => {
     app.get(`/version/current`, (req, res) => {
         const fs = require("fs");
 
-        const json = JSON.parse(fs.readFileSync(`${ROOT}/versions/versions.json`).toString('utf8'));
-
         let ver = null;
 
-        if(json.length > 0){
+        const packages = fs.readdirSync(`${ROOT}/versions`);
 
-            json.sort((a, b) => {
-                var versionA = a.version.toLowerCase(), versionB = b.version.toLowerCase();
-                if (versionA > versionB)
-                    return -1;
-                if (versionA < versionB)
-                    return 1;
-                return 0;
+        if (packages.length > 0) {
+
+            packages.sort((a, b) => {
+                if (a > b)
+                    return -1;
+                if (a < b)
+                    return 1;
+
+                return 0;
             });
 
-            ver = json[0];
+            ver = packages[0];
         }
         
-        res.send(ver);
+        res.json(ver);
     });
 
 
