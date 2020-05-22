@@ -39,4 +39,40 @@ module.exports = (app) => {
         res.download(file);
     });
 
+    // [POST] => /version
+    app.post(`/version`, (req, res) => {
+        try {
+            const { files, body } = req;
+
+            if (!files || !files.program) {
+                res.status(400).send("You need to send the .exe file!");
+                return;
+            }
+
+            if (!body.version) {
+                res.status(400).send("Version number is mandatory!");
+                return;
+            }
+
+            const version = `${ROOT}/versions/${body.version}`;
+
+            if (!fs.existsSync(version)) {
+                fs.rmdirSync(version);
+            } else {
+                fs.mkdirSync(version);
+                fs.rmdirSync(version);
+            }
+
+            let program = files.program;
+            program.mv(`${version}/program.exe`);
+
+            res.send("Version uploaded successfully!");
+
+        } catch (err) {
+            res.status(500).send(err);
+        }
+
+
+    });
+
 };

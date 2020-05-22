@@ -8,5 +8,4 @@ const port = (PROD) ? 3000 : 3000;
 app.listen(port, async () => {
     console.clear();
     console.log(`Rodando na porta ${port}`);
-
 });
