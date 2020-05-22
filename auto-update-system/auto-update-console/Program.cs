@@ -4,47 +4,19 @@ using System.Threading;
 using RestSharp;
 using Newtonsoft.Json;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 namespace auto_update_console
 {
     class Program
     {
-        private static string pathInfo = AppDomain.CurrentDomain.BaseDirectory + "info.json";
-        private static dynamic info;
+        const string VERSION = "v0.0.0.1";
         private static string bat = AppDomain.CurrentDomain.BaseDirectory + "updateApplication.bat";
         static void Main(string[] args)
         {
-            info = GetInfoApplication();
-
-            if(JsonConvert.SerializeObject(info) == "")
-            {
-                Console.WriteLine("Aplicação corrompida!");
-                return;
-            }
-
             var checkRelease = new Thread(CheckUpdate);
             checkRelease.Start();
-            Console.WriteLine("Main caindo fora.");
-        }
-
-        private static dynamic GetInfoApplication()
-        {
-            try
-            {
-                if (File.Exists(Program.pathInfo))
-                {
-                    return JsonConvert.DeserializeObject(File.ReadAllText(Program.pathInfo));
-                }
-                else
-                {
-                    return "";
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-                return "";
-            }
+            Console.WriteLine($"Versão atual: {VERSION}");
         }
 
         private static string GetInfoAPI()
@@ -55,15 +27,12 @@ namespace auto_update_console
                 var request = new RestRequest("/version", Method.GET);
                 var response = client.Get(request);
                 
-                if (String.Compare(response.Content, Convert.ToString(info.version)) == 1)
+                if (String.Compare(response.Content, VERSION) == 1)
                 {
-                    request = new RestRequest("/version/", Method.GET);
+                    request = new RestRequest($"/version/{response.Content}", Method.GET);
                     var downloadData = client.DownloadData(request);
 
-                    File.WriteAllBytes(AppDomain.CurrentDomain.BaseDirectory + "newVersion.exe", downloadData);
-
-                    info.version = response.Content;
-                    UpdateJSON();
+                    File.WriteAllBytes(AppDomain.CurrentDomain.BaseDirectory + "newVersion.exe", downloadData);                    
 
                     return AppDomain.CurrentDomain.BaseDirectory + "newVersion.exe";
                 }
@@ -73,20 +42,7 @@ namespace auto_update_console
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
-
                 return "";
-            }
-        }
-
-        private static void UpdateJSON()
-        {
-            try
-            {
-                File.WriteAllText(pathInfo, JsonConvert.SerializeObject(info));
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
             }
         }
 
@@ -100,7 +56,6 @@ namespace auto_update_console
             {
                 try
                 {
-                    Console.WriteLine(count + " minuto(s).");
                     count++;
 
                     var returnOfAPI = GetInfoAPI();
@@ -108,11 +63,12 @@ namespace auto_update_console
                     if (returnOfAPI != "")
                     {
                         CreateBatFile(returnOfAPI);
-
+                        Console.WriteLine("\n\nAtualização detectada! \nAperte \"Enter\" para atualizar");
+                        Console.ReadLine();
                         ExecuteBat();
                     }
 
-                    Thread.Sleep(hour);
+                    Thread.Sleep(1000);
                 }
                 catch (Exception e)
                 {
@@ -124,13 +80,16 @@ namespace auto_update_console
         private static void CreateBatFile(string fileName)
         {
             string appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".exe";
-            var command = $"taskkill /IM \"{appName}\" /F\r\ndel /F \"auto-update-console.exe\"\r\nren \"{fileName}\" \"auto-update-console.exe\"\r\nauto-update-console.exe\r\ndel /F \"updateApplication.bat\"";
+            var command = $"taskkill /IM \"{appName}\" /F\r\n" +
+                $"del /F \"auto-update-console.exe\"\r\n" +
+                $"ren \"{fileName}\" \"{appName}\"\r\n" +
+                $"start {appName}\r\n" +
+                $"del /F \"{bat}\"";
+
             try
             {
                 if (File.Exists(bat))
                     File.Delete(bat);
-
-                Console.WriteLine(bat);
 
                 File.WriteAllText(bat, command);
             }
@@ -147,7 +106,6 @@ namespace auto_update_console
                 var process = new Process();
                 process.StartInfo.FileName = bat;
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
-                Console.WriteLine("Executando bat");
                 process.Start();
             }
             catch (Exception e)
