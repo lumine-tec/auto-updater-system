@@ -3,13 +3,15 @@ using System.IO;
 using System.Threading;
 using RestSharp;
 using Newtonsoft.Json;
+using System.Diagnostics;
 
 namespace auto_update_console
 {
     class Program
     {
         private static string pathInfo = AppDomain.CurrentDomain.BaseDirectory + "info.json";
-        private static object info;
+        private static dynamic info;
+        private static string bat = AppDomain.CurrentDomain.BaseDirectory + "updateApplication.bat";
         static void Main(string[] args)
         {
             info = GetInfoApplication();
@@ -25,7 +27,7 @@ namespace auto_update_console
             Console.WriteLine("Main caindo fora.");
         }
 
-        private static object GetInfoApplication()
+        private static dynamic GetInfoApplication()
         {
             try
             {
@@ -50,6 +52,18 @@ namespace auto_update_console
             try
             {
                 var client = new RestClient("http://localhost:3000");
+                var request = new RestRequest("/version", Method.GET);
+                var response = client.Get(request);
+                
+                if (String.Compare(response.Content, Convert.ToString(info.version)) == 1)
+                {
+                    request = new RestRequest("/version/", Method.GET);
+                    var downloadData = client.DownloadData(request);
+
+                    File.WriteAllBytes(AppDomain.CurrentDomain.BaseDirectory + "newVersion.exe", downloadData);
+
+                    return AppDomain.CurrentDomain.BaseDirectory + "newVersion.exe";
+                }
 
                 return "";
             }
@@ -94,8 +108,7 @@ namespace auto_update_console
 
         private static void CreateBatFile(string fileName)
         {
-            var bat = AppDomain.CurrentDomain.BaseDirectory + "updateApplication.bat";
-            var command = $"taskkill \"auto - update - console.exe\" /IM /F\r\ndel / f \"auto-update-console.exe\"\r\nren \r\n\"{fileName}\" \"auto-update-console.exe\"\r\nauto - update - console.exe";
+            var command = $"taskkill \"auto - update - console.exe\" /IM /F\r\ndel / f \"auto-update-console.exe\"\r\nren \"{fileName}\" \"auto-update-console.exe\"\r\nauto-update-console.exe";
             try
             {
                 if (File.Exists(bat))
@@ -115,7 +128,10 @@ namespace auto_update_console
         {
             try
             {
-
+                var process = new Process();
+                process.StartInfo.FileName = bat;
+                process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                process.Start();
             }
             catch (Exception e)
             {
