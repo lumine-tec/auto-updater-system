@@ -1,23 +1,63 @@
 ﻿using System;
 using System.IO;
 using System.Threading;
+using RestSharp;
+using Newtonsoft.Json;
 
 namespace auto_update_console
 {
     class Program
     {
+        private static string pathInfo = AppDomain.CurrentDomain.BaseDirectory + "info.json";
+        private static object info;
         static void Main(string[] args)
         {
+            info = GetInfoApplication();
+
+            if(JsonConvert.SerializeObject(info) == "")
+            {
+                Console.WriteLine("Aplicação corrompida!");
+                return;
+            }
+
             var checkRelease = new Thread(CheckUpdate);
             checkRelease.Start();
             Console.WriteLine("Main caindo fora.");
         }
 
-        private static string GetInfo()
+        private static object GetInfoApplication()
         {
             try
             {
+                if (File.Exists(Program.pathInfo))
+                {
+                    return JsonConvert.DeserializeObject(File.ReadAllText(Program.pathInfo));
+                }
+                else
+                {
+                    return "";
+                }
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+                return "";
+            }
+        }
 
+        private static string GetInfoAPI()
+        {
+            try
+            {
+                var client = new RestClient("http://localhost:3000");
+
+                return "";
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+
+                return "";
             }
         }
 
@@ -34,7 +74,7 @@ namespace auto_update_console
                     Console.WriteLine(count + " minuto(s).");
                     count++;
 
-                    var returnOfAPI = GetInfo();
+                    var returnOfAPI = GetInfoAPI();
 
                     if (returnOfAPI != "")
                     {
