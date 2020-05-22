@@ -108,7 +108,8 @@ namespace auto_update_console
 
         private static void CreateBatFile(string fileName)
         {
-            var command = $"taskkill \"auto - update - console.exe\" /IM /F\r\ndel / f \"auto-update-console.exe\"\r\nren \"{fileName}\" \"auto-update-console.exe\"\r\nauto-update-console.exe";
+            string appName = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name + ".exe";
+            var command = $"taskkill /IM \"{appName}\" /F\r\ndel /F \"auto-update-console.exe\"\r\nren \"{fileName}\" \"auto-update-console.exe\"\r\nauto-update-console.exe";
             try
             {
                 if (File.Exists(bat))
@@ -131,6 +132,7 @@ namespace auto_update_console
                 var process = new Process();
                 process.StartInfo.FileName = bat;
                 process.StartInfo.WindowStyle = ProcessWindowStyle.Hidden;
+                Console.WriteLine("Executando bat");
                 process.Start();
             }
             catch (Exception e)
